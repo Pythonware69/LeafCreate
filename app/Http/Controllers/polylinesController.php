@@ -7,15 +7,11 @@ use Illuminate\Http\Request;
 
 class polylinesController extends Controller
 {
-    protected $polylines;
-
     public function __construct()
     {
         $this->polylines = new polylinesModel();
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         //

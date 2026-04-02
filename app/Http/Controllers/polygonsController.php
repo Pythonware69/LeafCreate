@@ -7,15 +7,11 @@ use Illuminate\Http\Request;
 
 class polygonsController extends Controller
 {
-    protected $polygons;
-
     public function __construct()
     {
         $this->polygons = new polygonsModel();
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         //
