@@ -176,14 +176,21 @@
         const map = L.map('map').setView([-6.2088, 106.8456], 12);
 
         // Add OpenStreetMap basemap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19,
             minZoom: 2
         }).addTo(map);
 
-        /* Digitize Function */
+        /* Geometry Feature Layers */
+        var pointsLayer = new L.FeatureGroup();
+        var polylinesLayer = new L.FeatureGroup();
+        var polygonsLayer = new L.FeatureGroup();
         var drawnItems = new L.FeatureGroup();
+
+        map.addLayer(pointsLayer);
+        map.addLayer(polylinesLayer);
+        map.addLayer(polygonsLayer);
         map.addLayer(drawnItems);
 
         // Load saved data from API
@@ -202,7 +209,7 @@
                     layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
                   }
                 }
-              }).addTo(drawnItems);
+              }).addTo(pointsLayer);
             }
 
             // Polylines
@@ -215,7 +222,7 @@
                     layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
                   }
                 }
-              }).addTo(drawnItems);
+              }).addTo(polylinesLayer);
             }
 
             // Polygons
@@ -228,7 +235,7 @@
                     layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
                   }
                 }
-              }).addTo(drawnItems);
+              }).addTo(polygonsLayer);
             }
           } catch (error) {
             console.error('Error loading saved layers:', error);
@@ -252,6 +259,19 @@
         });
 
         map.addControl(drawControl);
+
+        // Add layer control for geometry features
+        var layerControl = L.control.layers(
+            { 'OpenStreetMap': osmLayer },
+            {
+                'Points': pointsLayer,
+                'Polylines': polylinesLayer,
+                'Polygons': polygonsLayer,
+                'Drawn Items': drawnItems
+            },
+            { position: 'topright', collapsed: false }
+        );
+        map.addControl(layerControl);
 
         map.on('draw:created', function(e) {
             var type = e.layerType,
