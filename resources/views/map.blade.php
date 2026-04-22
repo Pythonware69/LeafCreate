@@ -1,31 +1,18 @@
 @extends('layouts.templatemap')
 
 @section('styles')
-    {{--Leagflet CSS and JS--}}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
-
+    {{-- Leaflet Draw CSS only (Leaflet CSS in layout if needed) --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        html, body {
-            height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
-
         #map {
-            height: calc(100vh - 60px);
+            height: 100vh;
             width: 100%;
-            position: relative;
+            display: block !important;
         }
     </style>
 @endsection
@@ -108,15 +95,13 @@
                         <div class="mb-3">
                             <label for="description" class="form-label">Polyline Description</label>
                             <textarea class="form-control" id="description"
-                            name="description" rows="3" placeholder="Enter polyline
-                            description" required>{{ old('description') }}</textarea>
+                            name="description" rows="3" placeholder="Enter polyline description" required>{{ old('description') }}</textarea>
                         </div>
                         <div class="mb-3">
                             <label for="geometry_polyline" class="form-label">
                             Polyline Geometry</label>
                             <textarea class="form-control" id="geometry_polyline" readonly
-                            name="geometry_polyline" rows="3" placeholder="Enter polyline geometry">{{ old
-                            ('geometry_polyline') }}</textarea>
+                            name="geometry_polyline" rows="3" placeholder="Enter polyline geometry">{{ old('geometry_polyline') }}</textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -138,12 +123,10 @@
                 </div>
                 <form action="{{ route('polygons.store') }}" method="post">
                     @csrf
-                    <div class="modal-body
-                    ">
+                    <div class="modal-body">
                         @if ($errors->any())
                             <div class="alert alert-danger">
-                                <
-                                ul class="mb-0">
+                                <ul class="mb-0">
                                     @foreach ($errors->all() as $error)
                                         <li>{{ $error }}</li>
                                     @endforeach
@@ -180,19 +163,15 @@
 
 
 @section('scripts')
-        {{-- Bootstrap JS --}}
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-        {{-- Leaflet JS --}}
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        {{-- Leaflet Draw JS --}}
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-        {{-- Terraformer JS --}}
-        <script src="https://cdn.jsdelivr.net/npm/terraformer@1.0.8/terraformer.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/terraformer-wkt-parser@1.2.1/terraformer-wkt-parser.min.js"></script>
-        {{-- JQuery JS --}}
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Leaflet Draw JS (others in layout) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <!-- Terraformer -->
+    <script src="https://cdn.jsdelivr.net/npm/terraformer@1.0.8/terraformer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/terraformer-wkt-parser@1.2.1/terraformer-wkt-parser.min.js"></script>
 
     <script>
+        // Wait for DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
         // Initialize map centered on Jakarta
         const map = L.map('map').setView([-6.2088, 106.8456], 12);
 
@@ -206,6 +185,58 @@
         /* Digitize Function */
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
+
+        // Load saved data from API
+        async function loadSavedLayers() {
+          try {
+            // Points
+            const pointsRes = await fetch('/api/points');
+            const pointsData = await pointsRes.json();
+            if (pointsData.status === 'success' && pointsData.data.features.length > 0) {
+              L.geoJSON(pointsData.data, {
+                pointToLayer: function(feature, latlng) {
+                  return L.marker(latlng);
+                },
+                onEachFeature: function(feature, layer) {
+                  if (feature.properties.name) {
+                    layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
+                  }
+                }
+              }).addTo(drawnItems);
+            }
+
+            // Polylines
+            const polylinesRes = await fetch('/api/polylines');
+            const polylinesData = await polylinesRes.json();
+            if (polylinesData.status === 'success' && polylinesData.data.features.length > 0) {
+              L.geoJSON(polylinesData.data, {
+                onEachFeature: function(feature, layer) {
+                  if (feature.properties.name) {
+                    layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
+                  }
+                }
+              }).addTo(drawnItems);
+            }
+
+            // Polygons
+            const polygonsRes = await fetch('/api/polygons');
+            const polygonsData = await polygonsRes.json();
+            if (polygonsData.status === 'success' && polygonsData.data.features.length > 0) {
+              L.geoJSON(polygonsData.data, {
+                onEachFeature: function(feature, layer) {
+                  if (feature.properties.name) {
+                    layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
+                  }
+                }
+              }).addTo(drawnItems);
+            }
+          } catch (error) {
+            console.error('Error loading saved layers:', error);
+          }
+        }
+
+        // Load saved layers when map is ready
+        map.whenReady(loadSavedLayers);
 
         var drawControl = new L.Control.Draw({
             draw: {
@@ -253,7 +284,7 @@
 
             drawnItems.addLayer(layer);
         });
-
-
+        });
     </script>
 @endsection
+
