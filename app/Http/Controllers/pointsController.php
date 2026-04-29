@@ -37,13 +37,31 @@ class pointsController extends Controller
             'name' => 'required|string|min:3|max:255',
             'description' => 'required|string|min:5|max:1000',
             'geometry_point' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        //create directory if not exists
+        if (!is_dir('storage/images')) {
+            mkdir('./storage/images', 0777);
+        }
+
+        //get image from request and save to storage/images directory with unique name and get the name of the image
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name_image = time() . "_point." . strtolower($image->getClientOriginalExtension());
+            $image->move('storage/images', $name_image);
+        } else {
+            $name_image = null;
+        }
 
         $data = [
             'geom' => $validated['geometry_point'],
             'name' => $validated['name'],
             'description' => $validated['description'],
+            'image' => $name_image,
         ];
+
+        dd($data);
 
         //save data to database and return to map page with success message or failed
         if ($this->points->create($data)) {

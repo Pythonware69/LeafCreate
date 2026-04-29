@@ -35,12 +35,23 @@ class polygonsController extends Controller
             'name' => 'required|string|min:3|max:255',
             'description' => 'required|string|min:5|max:1000',
             'geometry_polygon' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        //get image from request and save to storage/images directory with unique name and get the name of the image
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name_image = time() . "_polygon." . strtolower($image->getClientOriginalExtension());
+            $image->move('storage/images', $name_image);
+        } else {
+            $name_image = null;
+        }
 
         $data = [
             'geom' => $validated['geometry_polygon'],
             'name' => $validated['name'],
             'description' => $validated['description'],
+            'image' => $name_image,
         ];
 
         //save data to database and return to map page with success message

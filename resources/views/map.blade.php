@@ -29,7 +29,7 @@
                     <h5 class="modal-title">Input Point </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('points.store') }}" method="post">
+                <form action="{{ route('points.store') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         @if ($errors->any())
@@ -56,6 +56,13 @@
                             <textarea class="form-control" id="geometry_point" readonly
                             name="geometry_point" rows="3" placeholder="Enter point geometry">{{ old('geometry_point') }}</textarea>
                         </div>
+                        <div class="mb-3">
+                            <label for="image"
+                            class="form-label">Point Image</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*"
+                            onchange="document.getElementById('preview-image-point').src = window.URL.createObjectURL(this.files[0])">
+                            <img id="preview-image-point" style="margin-top: 10px; max-width: 100%; max-height: 300px;" />
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -75,7 +82,7 @@
                     <h5 class="modal-title">Input Polyline </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('polylines.store') }}" method="post">
+                <form action="{{ route('polylines.store') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         @if ($errors->any())
@@ -88,20 +95,27 @@
                             </div>
                         @endif
                         <div class="mb-3">
-                            <label for="name" class="form-label">Polyline Name</label>
-                            <input type="text" class="form-control" id="name"
+                            <label for="name-polyline" class="form-label">Polyline Name</label>
+                            <input type="text" class="form-control" id="name-polyline"
                             name="name" placeholder="Enter polyline name" value="{{ old('name') }}" required>
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Polyline Description</label>
-                            <textarea class="form-control" id="description"
+                            <label for="description-polyline" class="form-label">Polyline Description</label>
+                            <textarea class="form-control" id="description-polyline"
                             name="description" rows="3" placeholder="Enter polyline description" required>{{ old('description') }}</textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="geometry_polyline" class="form-label">
+                            <label for="geometry-polyline" class="form-label">
                             Polyline Geometry</label>
-                            <textarea class="form-control" id="geometry_polyline" readonly
+                            <textarea class="form-control" id="geometry-polyline" readonly
                             name="geometry_polyline" rows="3" placeholder="Enter polyline geometry">{{ old('geometry_polyline') }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image-polyline"
+                            class="form-label">Polyline Image</label>
+                            <input type="file" class="form-control" id="image-polyline" name="image" accept="image/*"
+                            onchange="document.getElementById('preview-image-polyline').src = window.URL.createObjectURL(this.files[0])">
+                            <img id="preview-image-polyline" style="margin-top: 10px; max-width: 100%; max-height: 300px;" />
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -121,7 +135,7 @@
                     <h5 class="modal-title">Input Polygon </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('polygons.store') }}" method="post">
+                <form action="{{ route('polygons.store') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         @if ($errors->any())
@@ -134,19 +148,26 @@
                             </div>
                         @endif
                         <div class="mb-3">
-                            <label for="name" class="form-label">Polygon Name</label>
-                            <input type="text" class="form-control" id="name"
+                            <label for="name-polygon" class="form-label">Polygon Name</label>
+                            <input type="text" class="form-control" id="name-polygon"
                             name="name" placeholder="Enter polygon name" value="{{ old('name') }}" required>
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label">Polygon Description</label>
-                            <textarea class="form-control" id="description"
+                            <label for="description-polygon" class="form-label">Polygon Description</label>
+                            <textarea class="form-control" id="description-polygon"
                             name="description" rows="3" placeholder="Enter polygon description" required>{{ old('description') }}</textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="geometry_polygon" class="form-label">Polygon Geometry</label>
-                            <textarea class="form-control" id="geometry_polygon" readonly
+                            <label for="geometry-polygon" class="form-label">Polygon Geometry</label>
+                            <textarea class="form-control" id="geometry-polygon" readonly
                             name="geometry_polygon" rows="3" placeholder="Enter polygon geometry">{{ old('geometry_polygon') }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image-polygon"
+                            class="form-label">Polygon Image</label>
+                            <input type="file" class="form-control" id="image-polygon" name="image" accept="image/*"
+                            onchange="document.getElementById('preview-image-polygon').src = window.URL.createObjectURL(this.files[0])">
+                            <img id="preview-image-polygon" style="margin-top: 10px; max-width: 100%; max-height: 300px;" />
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -206,7 +227,15 @@
                 },
                 onEachFeature: function(feature, layer) {
                   if (feature.properties.name) {
-                    layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
+                    if (feature.properties.image) {
+                      const imageUrl = '/storage/images/' + feature.properties.image;
+                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || '') +
+                      '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">',
+                      { maxWidth: 280, maxHeight: 400 });
+                    } else {
+                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''),
+                      { maxWidth: 280 });
+                    }
                   }
                 }
               }).addTo(pointsLayer);
@@ -219,7 +248,15 @@
               L.geoJSON(polylinesData.data, {
                 onEachFeature: function(feature, layer) {
                   if (feature.properties.name) {
-                    layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
+                    if (feature.properties.image) {
+                      const imageUrl = '/storage/images/' + feature.properties.image;
+                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || '') +
+                      '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">',
+                      { maxWidth: 280, maxHeight: 400 });
+                    } else {
+                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''),
+                      { maxWidth: 280 });
+                    }
                   }
                 }
               }).addTo(polylinesLayer);
@@ -232,7 +269,15 @@
               L.geoJSON(polygonsData.data, {
                 onEachFeature: function(feature, layer) {
                   if (feature.properties.name) {
-                    layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''));
+                    if (feature.properties.image) {
+                      const imageUrl = '/storage/images/' + feature.properties.image;
+                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || '') +
+                      '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">',
+                      { maxWidth: 280, maxHeight: 400 });
+                    } else {
+                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''),
+                      { maxWidth: 280 });
+                    }
                   }
                 }
               }).addTo(polygonsLayer);
@@ -288,14 +333,14 @@
                 });
 
             } else if (type === 'polyline') {
-                $('#geometry_polyline').val(objectGeometry);
+                $('#geometry-polyline').val(objectGeometry);
                 $('#modalInputPolyline').modal('show');
                 $('#modalInputPolyline').on('hidden.bs.modal', function () {
                     window.location.reload();
                 });
 
             } else if (type === 'polygon' || type === 'rectangle') {
-                $('#geometry_polygon').val(objectGeometry);
+                $('#geometry-polygon').val(objectGeometry);
                 $('#modalInputPolygon').modal('show');
                 $('#modalInputPolygon').on('hidden.bs.modal', function () {
                     window.location.reload();
