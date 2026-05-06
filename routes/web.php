@@ -18,16 +18,22 @@ Route::get('/tabel', function () {
 })->name('tabel');
 
 //points
-Route::post('/points', [pointsController::class, 'store'])
+Route::post('/store-points', [pointsController::class, 'store'])
 ->name('points.store');
+Route::delete('/destroy-points/{id}', [pointsController::class, 'destroy'])
+->name('points.delete');
 
 //polylines
-Route::post('/polylines', [polylinesController::class, 'store'])
+Route::post('/store-polylines', [polylinesController::class, 'store'])
 ->name('polylines.store');
+Route::delete('/destroy-polylines/{id}', [polylinesController::class, 'destroy'])
+->name('polylines.delete');
 
 //polygons
-Route::post('/polygons', [polygonsController::class, 'store'])
+Route::post('/store-polygons', [polygonsController::class, 'store'])
 ->name('polygons.store');
+Route::delete('/destroy-polygons/{id}', [polygonsController::class, 'destroy'])
+->name('polygons.delete');
 
 
 Route::view('dashboard', 'dashboard')

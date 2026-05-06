@@ -88,6 +88,17 @@ class polylinesController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $polyline = $this->polylines->find($id);
+        if ($polyline) {
+            // Delete image if it exists
+            if ($polyline->image && file_exists('storage/images/' . $polyline->image)) {
+                unlink('storage/images/' . $polyline->image);
+            }
+            $polyline->delete();
+            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+        }
+        return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+
+        dd($id);
     }
 }

@@ -191,6 +191,97 @@
     <script src="https://cdn.jsdelivr.net/npm/terraformer-wkt-parser@1.2.1/terraformer-wkt-parser.min.js"></script>
 
     <script>
+        // Delete functions - GLOBAL SCOPE
+        function deletePoint(id) {
+            if (confirm('Are you sure you want to delete this point?')) {
+                fetch('/destroy-points/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Delete failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Point deleted successfully');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to delete point'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting point: ' + error.message);
+                });
+            }
+        }
+
+        function deletePolyline(id) {
+            if (confirm('Are you sure you want to delete this polyline?')) {
+                fetch('/destroy-polylines/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Delete failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Polyline deleted successfully');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to delete polyline'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting polyline: ' + error.message);
+                });
+            }
+        }
+
+        function deletePolygon(id) {
+            if (confirm('Are you sure you want to delete this polygon?')) {
+                fetch('/destroy-polygons/' + id, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Delete failed: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Polygon deleted successfully');
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Failed to delete polygon'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting polygon: ' + error.message);
+                });
+            }
+        }
+
         // Wait for DOM ready
         document.addEventListener('DOMContentLoaded', function() {
         // Initialize map centered on Jakarta
@@ -227,15 +318,13 @@
                 },
                 onEachFeature: function(feature, layer) {
                   if (feature.properties.name) {
+                    let popupContent = feature.properties.name + '<br>' + (feature.properties.description || '');
                     if (feature.properties.image) {
                       const imageUrl = '/storage/images/' + feature.properties.image;
-                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || '') +
-                      '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">',
-                      { maxWidth: 280, maxHeight: 400 });
-                    } else {
-                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''),
-                      { maxWidth: 280 });
+                      popupContent += '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">';
                     }
+                    popupContent += '<br><button class="btn btn-sm btn-danger mt-2" onclick="deletePoint(' + feature.properties.id + ')">Delete</button>';
+                    layer.bindPopup(popupContent, { maxWidth: 280, maxHeight: 400 });
                   }
                 }
               }).addTo(pointsLayer);
@@ -248,15 +337,13 @@
               L.geoJSON(polylinesData.data, {
                 onEachFeature: function(feature, layer) {
                   if (feature.properties.name) {
+                    let popupContent = feature.properties.name + '<br>' + (feature.properties.description || '');
                     if (feature.properties.image) {
                       const imageUrl = '/storage/images/' + feature.properties.image;
-                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || '') +
-                      '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">',
-                      { maxWidth: 280, maxHeight: 400 });
-                    } else {
-                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''),
-                      { maxWidth: 280 });
+                      popupContent += '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">';
                     }
+                    popupContent += '<br><button class="btn btn-sm btn-danger mt-2" onclick="deletePolyline(' + feature.properties.id + ')">Delete</button>';
+                    layer.bindPopup(popupContent, { maxWidth: 280, maxHeight: 400 });
                   }
                 }
               }).addTo(polylinesLayer);
@@ -269,15 +356,13 @@
               L.geoJSON(polygonsData.data, {
                 onEachFeature: function(feature, layer) {
                   if (feature.properties.name) {
+                    let popupContent = feature.properties.name + '<br>' + (feature.properties.description || '');
                     if (feature.properties.image) {
                       const imageUrl = '/storage/images/' + feature.properties.image;
-                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || '') +
-                      '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">',
-                      { maxWidth: 280, maxHeight: 400 });
-                    } else {
-                      layer.bindPopup(feature.properties.name + '<br>' + (feature.properties.description || ''),
-                      { maxWidth: 280 });
+                      popupContent += '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">';
                     }
+                    popupContent += '<br><button class="btn btn-sm btn-danger mt-2" onclick="deletePolygon(' + feature.properties.id + ')">Delete</button>';
+                    layer.bindPopup(popupContent, { maxWidth: 280, maxHeight: 400 });
                   }
                 }
               }).addTo(polygonsLayer);
@@ -304,6 +389,7 @@
         });
 
         map.addControl(drawControl);
+
 
         // Add layer control for geometry features
         var layerControl = L.control.layers(

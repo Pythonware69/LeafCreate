@@ -61,8 +61,6 @@ class pointsController extends Controller
             'image' => $name_image,
         ];
 
-        dd($data);
-
         //save data to database and return to map page with success message or failed
         if ($this->points->create($data)) {
             return redirect()->route('peta')->with('success', 'Data berhasil disimpan');
@@ -100,6 +98,15 @@ class pointsController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $point = $this->points->find($id);
+        if ($point) {
+            // Delete image if it exists
+            if ($point->image && file_exists('storage/images/' . $point->image)) {
+                unlink('storage/images/' . $point->image);
+            }
+            $point->delete();
+            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+        }
+        return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
     }
 }

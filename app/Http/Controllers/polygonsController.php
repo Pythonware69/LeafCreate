@@ -88,6 +88,17 @@ class polygonsController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $polygon = $this->polygons->find($id);
+        if ($polygon) {
+            // Delete image if it exists
+            if ($polygon->image && file_exists('storage/images/' . $polygon->image)) {
+                unlink('storage/images/' . $polygon->image);
+            }
+            $polygon->delete();
+            return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+        }
+        return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+
+        dd($id);
     }
 }
