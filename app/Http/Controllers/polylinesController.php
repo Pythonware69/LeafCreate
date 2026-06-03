@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 class polylinesController extends Controller
 {
+    protected $polylines;
+
     public function __construct()
     {
         $this->polylines = new polylinesModel();
@@ -80,7 +82,55 @@ class polylinesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Validate input
+        $validated = $request->validate([
+            'name' => 'required|string|min:3|max:255',
+            'description' => 'required|string|min:5|max:1000',
+            'geometry_polyline' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Find the polyline to update
+        $polyline = $this->polylines->find($id);
+        if (!$polyline) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+            }
+            return redirect()->route('peta')->with('error', 'Data tidak ditemukan');
+        }
+
+        // Handle image upload
+        $name_image = $polyline->image; // Keep existing image by default
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists
+            if ($polyline->image && file_exists('storage/images/' . $polyline->image)) {
+                unlink('storage/images/' . $polyline->image);
+            }
+            // Save new image
+            $image = $request->file('image');
+            $name_image = time() . "_polyline." . strtolower($image->getClientOriginalExtension());
+            $image->move('storage/images', $name_image);
+        }
+
+        $data = [
+            'geom' => $validated['geometry_polyline'],
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'image' => $name_image,
+        ];
+
+        // Update data to database
+        if ($polyline->update($data)) {
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Data berhasil diperbarui']);
+            }
+            return redirect()->route('peta')->with('success', 'Data berhasil diperbarui');
+        } else {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Data gagal diperbarui'], 500);
+            }
+            return redirect()->route('peta')->with('error', 'Data gagal diperbarui');
+        }
     }
 
     /**

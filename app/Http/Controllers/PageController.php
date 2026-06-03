@@ -2,16 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\pointsModel;
+use App\Models\polylinesModel;
+use App\Models\polygonsModel;
 
 class PageController extends Controller
 {
-    public function home()
+    protected pointsModel $points;
+    protected polylinesModel $polylines;
+    protected polygonsModel $polygons;
+    public function __construct()
+    {
+        $this->points = new pointsModel();
+        $this->polylines = new polylinesModel();
+        $this->polygons = new polygonsModel();
+    }
+    public function landingpage()
     {
         $data = [
-            'title' => 'Home',
+            'title' => 'Welkam',
+            'pointsCount' => $this->points->count(),
+            'polylinesCount' => $this->polylines->count(),
+            'polygonsCount' => $this->polygons->count(),
         ];
-        return view('welcome', $data);
+
+        return view('home', $data);
     }
 
     public function peta()
@@ -26,7 +41,10 @@ class PageController extends Controller
     {
         $data = [
             'title' => 'Tabel Data',
+            'points' => $this->points->all(),
+            'polylines' => $this->polylines->all(),
+            'polygons' => $this->polygons->all(),
         ];
-        return view('tabel', $data);
+        return view('table', $data);
     }
 }

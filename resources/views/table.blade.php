@@ -24,41 +24,117 @@
             <div class="table-controls">
                 <div class="search-control">
                     <label for="search">Search:</label>
-                    <input type="text" id="search" placeholder="">
+                    <input type="text" id="search" placeholder="Search table...">
                 </div>
             </div>
 
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Reze</td>
-                        <td>My Bini</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Asa Mitaka</td>
-                        <td>My Bini</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>The Bear</td>
-                        <td>FX</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Gianpiero Lamberesing</td>
-                        <td>Absolutely Sticular</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="data-section">
+                <h3>Points</h3>
+                <table class="table table-hover table-bordered table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Image</th>
+                            <th>Date Added</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($points ?? [] as $item)
+                        <tr>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->description }}</td>
+                            <td>
+                                @if ($item->image)
+                                    <img src="{{ asset('storage/images/' . $item->image) }}" alt="{{ $item->name }}" style="max-width:120px; max-height:80px; object-fit:contain;" />
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ optional($item->created_at)->format('Y-m-d') ?? '-' }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center">No points available.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-section mt-5">
+                <h3>Polylines</h3>
+                <table class="table table-hover table-bordered table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Image</th>
+                            <th>Date Added</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($polylines ?? [] as $item)
+                        <tr>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->description }}</td>
+                            <td>
+                                @if ($item->image)
+                                    <img src="{{ asset('storage/images/' . $item->image) }}" alt="{{ $item->name }}" style="max-width:120px; max-height:80px; object-fit:contain;" />
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ optional($item->created_at)->format('Y-m-d') ?? '-' }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center">No polylines available.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-section mt-5">
+                <h3>Polygons</h3>
+                <table class="table table-hover table-bordered table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Image</th>
+                            <th>Date Added</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($polygons ?? [] as $item)
+                        <tr>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ $item->description }}</td>
+                            <td>
+                                @if ($item->image)
+                                    <img src="{{ asset('storage/images/' . $item->image) }}" alt="{{ $item->name }}" style="max-width:120px; max-height:80px; object-fit:contain;" />
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>{{ optional($item->created_at)->format('Y-m-d') ?? '-' }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center">No polygons available.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
             <div class="table-footer">
             </div>

@@ -26,11 +26,13 @@
          <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Input Point </h5>
+                    <h5 class="modal-title" id="point-modal-title">Input Point </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('points.store') }}" method="post" enctype="multipart/form-data">
+                <form id="formPoint" method="post" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" id="point-id" name="id">
+                    <div id="point-method"></div>
                     <div class="modal-body">
                         @if ($errors->any())
                             <div class="alert alert-danger">
@@ -74,16 +76,17 @@
     </div>
 
 
-{{--modal polyline input--}}
     <div class="modal fade" tabindex="-1" id="modalInputPolyline">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Input Polyline </h5>
+                    <h5 class="modal-title" id="polyline-modal-title">Input Polyline </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('polylines.store') }}" method="post" enctype="multipart/form-data">
+                <form id="formPolyline" method="post" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" id="polyline-id" name="id">
+                    <div id="polyline-method"></div>
                     <div class="modal-body">
                         @if ($errors->any())
                             <div class="alert alert-danger">
@@ -132,11 +135,13 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Input Polygon </h5>
+                    <h5 class="modal-title" id="polygon-modal-title">Input Polygon </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('polygons.store') }}" method="post" enctype="multipart/form-data">
+                <form id="formPolygon" method="post" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" id="polygon-id" name="id">
+                    <div id="polygon-method"></div>
                     <div class="modal-body">
                         @if ($errors->any())
                             <div class="alert alert-danger">
@@ -282,6 +287,94 @@
             }
         }
 
+        // Edit functions
+        function editPoint(id) {
+            // Fetch point data
+            fetch('/api/points')
+                .then(response => response.json())
+                .then(data => {
+                    const point = data.data.features.find(f => f.properties.id == id);
+                    if (point) {
+                        document.getElementById('point-id').value = id;
+                        document.getElementById('point-modal-title').textContent = 'Edit Point';
+                        document.getElementById('name').value = point.properties.name || '';
+                        document.getElementById('description').value = point.properties.description || '';
+                        document.getElementById('geometry_point').value = Terraformer.WKT.convert(point.geometry);
+
+                        // Set form action to update route
+                        const form = document.getElementById('formPoint');
+                        form.action = '/update-points/' + id;
+
+                        // Add PUT method (Laravel uses _method field)
+                        const methodDiv = document.getElementById('point-method');
+                        methodDiv.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+                        // Show modal for editing
+                        const modal = new bootstrap.Modal(document.getElementById('modalInputPoint'));
+                        modal.show();
+                    }
+                })
+                .catch(error => console.error('Error fetching point:', error));
+        }
+
+        function editPolyline(id) {
+            // Fetch polyline data
+            fetch('/api/polylines')
+                .then(response => response.json())
+                .then(data => {
+                    const polyline = data.data.features.find(f => f.properties.id == id);
+                    if (polyline) {
+                        document.getElementById('polyline-id').value = id;
+                        document.getElementById('polyline-modal-title').textContent = 'Edit Polyline';
+                        document.getElementById('name-polyline').value = polyline.properties.name || '';
+                        document.getElementById('description-polyline').value = polyline.properties.description || '';
+                        document.getElementById('geometry-polyline').value = Terraformer.WKT.convert(polyline.geometry);
+
+                        // Set form action to update route
+                        const form = document.getElementById('formPolyline');
+                        form.action = '/update-polylines/' + id;
+
+                        // Add PUT method (Laravel uses _method field)
+                        const methodDiv = document.getElementById('polyline-method');
+                        methodDiv.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+                        // Show modal for editing
+                        const modal = new bootstrap.Modal(document.getElementById('modalInputPolyline'));
+                        modal.show();
+                    }
+                })
+                .catch(error => console.error('Error fetching polyline:', error));
+        }
+
+        function editPolygon(id) {
+            // Fetch polygon data
+            fetch('/api/polygons')
+                .then(response => response.json())
+                .then(data => {
+                    const polygon = data.data.features.find(f => f.properties.id == id);
+                    if (polygon) {
+                        document.getElementById('polygon-id').value = id;
+                        document.getElementById('polygon-modal-title').textContent = 'Edit Polygon';
+                        document.getElementById('name-polygon').value = polygon.properties.name || '';
+                        document.getElementById('description-polygon').value = polygon.properties.description || '';
+                        document.getElementById('geometry-polygon').value = Terraformer.WKT.convert(polygon.geometry);
+
+                        // Set form action to update route
+                        const form = document.getElementById('formPolygon');
+                        form.action = '/update-polygons/' + id;
+
+                        // Add PUT method (Laravel uses _method field)
+                        const methodDiv = document.getElementById('polygon-method');
+                        methodDiv.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+
+                        // Show modal for editing
+                        const modal = new bootstrap.Modal(document.getElementById('modalInputPolygon'));
+                        modal.show();
+                    }
+                })
+                .catch(error => console.error('Error fetching polygon:', error));
+        }
+
         // Wait for DOM ready
         document.addEventListener('DOMContentLoaded', function() {
         // Initialize map centered on Jakarta
@@ -323,7 +416,7 @@
                       const imageUrl = '/storage/images/' + feature.properties.image;
                       popupContent += '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">';
                     }
-                    popupContent += '<br><button class="btn btn-sm btn-danger mt-2" onclick="deletePoint(' + feature.properties.id + ')">Delete</button>';
+                    popupContent += '<br><div style="display: flex; gap: 5px; margin-top: 8px;"><a class="btn btn-sm btn-primary" href="{{ route('mapedit') }}?type=point&id=' + feature.properties.id + '">Map Edit</a><button class="btn btn-sm btn-warning" onclick="editPoint(' + feature.properties.id + ')">Edit</button><button class="btn btn-sm btn-danger" onclick="deletePoint(' + feature.properties.id + ')">Delete</button></div>';
                     layer.bindPopup(popupContent, { maxWidth: 280, maxHeight: 400 });
                   }
                 }
@@ -342,7 +435,7 @@
                       const imageUrl = '/storage/images/' + feature.properties.image;
                       popupContent += '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">';
                     }
-                    popupContent += '<br><button class="btn btn-sm btn-danger mt-2" onclick="deletePolyline(' + feature.properties.id + ')">Delete</button>';
+                    popupContent += '<br><div style="display: flex; gap: 5px; margin-top: 8px;"><a class="btn btn-sm btn-primary" href="{{ route('mapedit') }}?type=polyline&id=' + feature.properties.id + '">Map Edit</a><button class="btn btn-sm btn-warning" onclick="editPolyline(' + feature.properties.id + ')">Edit</button><button class="btn btn-sm btn-danger" onclick="deletePolyline(' + feature.properties.id + ')">Delete</button></div>';
                     layer.bindPopup(popupContent, { maxWidth: 280, maxHeight: 400 });
                   }
                 }
@@ -361,7 +454,7 @@
                       const imageUrl = '/storage/images/' + feature.properties.image;
                       popupContent += '<br><img src="' + imageUrl + '" style="width:100%; max-width:250px; height:auto; margin-top:8px;">';
                     }
-                    popupContent += '<br><button class="btn btn-sm btn-danger mt-2" onclick="deletePolygon(' + feature.properties.id + ')">Delete</button>';
+                    popupContent += '<br><div style="display: flex; gap: 5px; margin-top: 8px;"><a class="btn btn-sm btn-primary" href="{{ route('mapedit') }}?type=polygon&id=' + feature.properties.id + '">Map Edit</a><button class="btn btn-sm btn-warning" onclick="editPolygon(' + feature.properties.id + ')">Edit</button><button class="btn btn-sm btn-danger" onclick="deletePolygon(' + feature.properties.id + ')">Delete</button></div>';
                     layer.bindPopup(popupContent, { maxWidth: 280, maxHeight: 400 });
                   }
                 }
@@ -391,7 +484,6 @@
         map.addControl(drawControl);
 
 
-        // Add layer control for geometry features
         var layerControl = L.control.layers(
             { 'OpenStreetMap': osmLayer },
             {
@@ -412,6 +504,12 @@
             var objectGeometry = Terraformer.WKT.convert(drawnJSONObject.geometry);
 
             if (type === 'marker') {
+                // Set form for create
+                document.getElementById('formPoint').action = '/store-points';
+                document.getElementById('point-method').innerHTML = '';
+                document.getElementById('point-modal-title').textContent = 'Input Point';
+                document.getElementById('point-id').value = '';
+
                 $('#geometry_point').val(objectGeometry);
                 $('#modalInputPoint').modal('show');
                 $('#modalInputPoint').on('hidden.bs.modal', function () {
@@ -419,6 +517,12 @@
                 });
 
             } else if (type === 'polyline') {
+                // Set form for create
+                document.getElementById('formPolyline').action = '/store-polylines';
+                document.getElementById('polyline-method').innerHTML = '';
+                document.getElementById('polyline-modal-title').textContent = 'Input Polyline';
+                document.getElementById('polyline-id').value = '';
+
                 $('#geometry-polyline').val(objectGeometry);
                 $('#modalInputPolyline').modal('show');
                 $('#modalInputPolyline').on('hidden.bs.modal', function () {
@@ -426,6 +530,12 @@
                 });
 
             } else if (type === 'polygon' || type === 'rectangle') {
+                // Set form for create
+                document.getElementById('formPolygon').action = '/store-polygons';
+                document.getElementById('polygon-method').innerHTML = '';
+                document.getElementById('polygon-modal-title').textContent = 'Input Polygon';
+                document.getElementById('polygon-id').value = '';
+
                 $('#geometry-polygon').val(objectGeometry);
                 $('#modalInputPolygon').modal('show');
                 $('#modalInputPolygon').on('hidden.bs.modal', function () {

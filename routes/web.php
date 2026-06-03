@@ -1,38 +1,44 @@
 <?php
 
-use App\Http\Controllers\pointsController;
-use App\Http\Controllers\polygonsController;
-use App\Http\Controllers\polylinesController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [PageController::class, 'landingpage'])->name('home');
 
-Route::get('/peta', function () {
-    return view('map');
-})->name('peta');
+Route::get('/peta', [PageController::class, 'peta'])->name('peta');
 
-Route::get('/tabel', function () {
-    return view('table');
-})->name('tabel');
+Route::get('/mapedit', [PageController::class, 'mapedit'])->name('mapedit');
+
+Route::get('/tabel', [PageController::class, 'tabel'])->name('tabel');
 
 //points
-Route::post('/store-points', [pointsController::class, 'store'])
+Route::post('/store-points', [\App\Http\Controllers\pointsController::class, 'store'])
 ->name('points.store');
-Route::delete('/destroy-points/{id}', [pointsController::class, 'destroy'])
+Route::put('/update-points/{id}', [\App\Http\Controllers\pointsController::class, 'update'])
+->name('points.update');
+Route::delete('/destroy-points/{id}', [\App\Http\Controllers\pointsController::class, 'destroy'])
 ->name('points.delete');
+Route::patch('/update-points/{id}', [\App\Http\Controllers\pointsController::class, 'update'])
+->name('points.update');
 
 //polylines
-Route::post('/store-polylines', [polylinesController::class, 'store'])
+Route::post('/store-polylines', [\App\Http\Controllers\polylinesController::class, 'store'])
 ->name('polylines.store');
-Route::delete('/destroy-polylines/{id}', [polylinesController::class, 'destroy'])
+Route::put('/update-polylines/{id}', [\App\Http\Controllers\polylinesController::class, 'update'])
+->name('polylines.update');
+Route::patch('/update-polylines/{id}', [\App\Http\Controllers\polylinesController::class, 'update'])
+->name('polylines.update');
+Route::delete('/destroy-polylines/{id}', [\App\Http\Controllers\polylinesController::class, 'destroy'])
 ->name('polylines.delete');
 
 //polygons
-Route::post('/store-polygons', [polygonsController::class, 'store'])
+Route::post('/store-polygons', [\App\Http\Controllers\polygonsController::class, 'store'])
 ->name('polygons.store');
-Route::delete('/destroy-polygons/{id}', [polygonsController::class, 'destroy'])
+Route::put('/update-polygons/{id}', [\App\Http\Controllers\polygonsController::class, 'update'])
+->name('polygons.update');
+Route::patch('/update-polygons/{id}', [\App\Http\Controllers\polygonsController::class, 'update'])
+->name('polygons.update');
+Route::delete('/destroy-polygons/{id}', [\App\Http\Controllers\polygonsController::class, 'destroy'])
 ->name('polygons.delete');
 
 

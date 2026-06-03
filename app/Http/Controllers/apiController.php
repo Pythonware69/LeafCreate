@@ -29,7 +29,7 @@ class apiController extends Controller
             'message' => 'Points retrieved successfully',
             'data'    => $points
         ], 200, [], JSON_NUMERIC_CHECK);
-    }
+    }  
 
     public function polylines()
     {
